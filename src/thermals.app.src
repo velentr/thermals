@@ -1,0 +1,10 @@
+{application, thermals,
+ [{mod, {thermals, []}},
+  {description, "Thermal monitoring and control"},
+  {vsn, "0.0.0"},
+  {modules, [thermals, thermals_class_fault, thermals_controller,
+             thermals_manager, thermals_sup]},
+  {registered, [thermals_evt, thermals_manager]},
+  {applications, [kernel, stdlib]}]}.
+
+% vim: set ft=erlang:
