@@ -1,0 +1,14 @@
+image: alpine/edge
+packages:
+        - make
+        - erlang
+        - erlang-common-test
+sources:
+        - https://git.sr.ht/~bdk/thermals
+tasks:
+        - build: |
+                cd thermals
+                make
+        - test: |
+                cd thermals
+                make ct
