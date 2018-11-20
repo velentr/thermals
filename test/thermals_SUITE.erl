@@ -1,8 +1,6 @@
 -module(thermals_SUITE).
 -author("Brian Kubisiak").
 
--include_lib("common_test/include/ct.hrl").
-
 % this module acts as a gen_event handler to read thermals events
 -behavior(gen_event).
 
