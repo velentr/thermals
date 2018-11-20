@@ -2,8 +2,8 @@
  [{mod, {thermals, []}},
   {description, "Thermal monitoring and control"},
   {vsn, "0.0.0"},
-  {modules, [thermals, thermals_class_fault, thermals_controller,
-             thermals_manager, thermals_sup]},
+  {modules, [thermals, thermals_class_fault, thermals_class_hwmon_temp,
+             thermals_controller, thermals_manager, thermals_sup]},
   {registered, [thermals_evt, thermals_manager]},
   {applications, [kernel, stdlib]}]}.
 

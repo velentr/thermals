@@ -7,7 +7,7 @@ ERLC ?= erlc
 ERL ?= erl
 EFLAGS += -o ebin
 CT ?= ct_run
-SUITE ?= thermals_SUITE
+SUITE ?= $(APPNAME)_SUITE
 
 include src/src.mk
 
