@@ -13,6 +13,8 @@ start_link(Type, Params) ->
   case Type of
     fault ->
       thermals_class_fault:start_link(Params);
+    hwmon_temp ->
+      thermals_class_hwmon_temp:start_link(Params);
     _ ->
       {error, unrecognized}
   end.
