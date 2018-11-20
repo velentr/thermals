@@ -9,8 +9,6 @@
 start_link(Params) when is_map(Params) ->
   gen_server:start_link(?MODULE, Params, []).
 
--spec read_all(Group :: any()) ->
-  {Status :: float(), [Error :: string()]}.
 read_all(Group) ->
   Inputs = pg2:get_members({Group, inputs}),
   lists:foldl(fun(Pid, {Status, Errs}) ->
@@ -20,8 +18,6 @@ read_all(Group) ->
                   end
               end, {0.0, []}, Inputs).
 
--spec write_all(Status :: float(), Group :: any()) ->
-  [Error :: string()].
 write_all(Status, Group) ->
   Outputs = pg2:get_members({Group, outputs}),
   lists:foldl(fun(Pid, Errs) ->
