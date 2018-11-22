@@ -1,14 +1,20 @@
 -module(thermals).
 -author("Brian Kubisiak").
 -behavior(application).
--export([fault/2, join_inputs/0, join_inputs/1, join_inputs/2, join_outputs/0,
-	 join_outputs/1, join_outputs/2, spawn/2, watch/2, watch_sup/2]).
+-export([join_inputs/0, join_inputs/1, join_inputs/2, join_outputs/0,
+	 join_outputs/1, join_outputs/2, spawn/2, watch/2,
+	 watch_sup/2]).
+-export([fault/2, hi/2, lo/2]).
 -export([start/2, stop/1]).
 
 -define(DEFAULT_GROUP, global_thermals).
 
 fault(Group, Reason) ->
     ok = gen_event:notify(thermals_evt, {fault, Group, Reason}).
+hi(Group, Value) ->
+    ok = gen_event:notify(thermals_evt, {warn, Group, {hi, Value}}).
+lo(Group, Value) ->
+    ok = gen_event:notify(thermals_evt, {info, Group, {lo, Value}}).
 
 join_inputs(Group, Pid) ->
     pg2:join({Group, inputs}, Pid).

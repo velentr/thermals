@@ -1,15 +1,15 @@
 -module(thermals_controller).
 -author("Brian Kubisiak").
--behavior(gen_server).
+-behavior(gen_statem).
 -export([start_link/1]).
--export([handle_call/3, handle_cast/2, handle_info/2, init/1]).
+-export([callback_mode/0, init/1, hi/3, lo/3]).
 
--record(state, {group :: atom(),
-                hi :: number(),
-                lo :: number()}).
+-record(data, {group :: atom(),
+               hi :: number(),
+               lo :: number()}).
 
 start_link(Params) when is_map(Params) ->
-    gen_server:start_link(?MODULE, Params, []).
+    gen_statem:start_link(?MODULE, Params, []).
 
 read_all(Group) ->
     Inputs = pg2:get_members({Group, inputs}),
@@ -29,10 +29,9 @@ write_all(Status, Group) ->
 			end
 		end, [], Outputs).
 
-handle_call(_Request, _From, State) -> {reply, notimplemented, State}.
-handle_cast(_Request, State) -> {noreply, State}.
+callback_mode() -> state_functions.
 
-handle_info(poll, State=#state{group=Group}) ->
+handle_poll(Group) ->
     {Status, IErrs} = read_all(Group),
     OErrs = write_all(Status, Group),
     Fault = fun(Err) ->
@@ -40,7 +39,7 @@ handle_info(poll, State=#state{group=Group}) ->
 	    end,
     ok = lists:foreach(Fault, IErrs),
     ok = lists:foreach(Fault, OErrs),
-    {noreply, State}.
+    Status.
 
 init(Params=#{group := Group, interval := Interval}) ->
     %% if no hi or lo thresholds are provided, we just set them to values that will
@@ -59,4 +58,31 @@ init(Params=#{group := Group, interval := Interval}) ->
     %% Interval timers are linked to the calling process, so we don't need to save
     %% the tref here
     {ok, _TRef} = timer:send_interval(Interval, poll),
-    {ok, #state{group=Group, hi=Hi, lo=Lo}}.
+    {ok, lo, #data{group=Group, hi=Hi, lo=Lo}}.
+
+lo({call, From}, _Contents, _Data) ->
+    {keep_state_and_data, {reply, From, notimplemented}};
+lo(cast, _Contents, _Data) ->
+    keep_state_and_data;
+lo(info, poll, Data=#data{group=Group, hi=Hi}) ->
+    Status = handle_poll(Group),
+    if Status =< Hi ->
+	    keep_state_and_data;
+       Status > Hi ->
+	    thermals:hi(Group, Status),
+	    {next_state, hi, Data}
+    end.
+
+hi({call, From}, _Contents, _Data) ->
+    {keep_state_and_data, {reply, From, notimplemented}};
+hi(cast, _Contents, _Data) ->
+    keep_state_and_data;
+hi(info, poll, Data=#data{group=Group, lo=Lo}) ->
+    Status = handle_poll(Group),
+    if Status >= Lo ->
+	    thermals:hi(Group, Status),
+	    keep_state_and_data;
+       Status < Lo ->
+	    thermals:lo(Group, Status),
+	    {next_state, lo, Data}
+    end.
