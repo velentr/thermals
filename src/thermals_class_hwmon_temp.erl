@@ -18,11 +18,7 @@ handle_call(thermals_read, _From, State) ->
 		{ok, SValueNl} ->
 		    SValue = string:chomp(SValueNl),
 		    Value = float(binary_to_integer(SValue)) / Scale,
-		    {ok, if
-			     Value < Min -> 0.0;
-			     Max < Value -> 1.0;
-			     true -> (Value - Min) / (Max - Min)
-			 end};
+		    {ok, (Value - Min) / (Max - Min)};
 		{error, Reason} ->
 		    {error, Reason}
 	    end,

@@ -11,11 +11,20 @@
 start_link(Params) when is_map(Params) ->
     gen_statem:start_link(?MODULE, Params, []).
 
+saturate(Val) ->
+    if Val < 0.0 ->
+	    0.0;
+       1.0 < Val ->
+	    1.0;
+       true ->
+	    Val
+    end.
+
 read_all(Group) ->
     Inputs = pg2:get_members({Group, inputs}),
     lists:foldl(fun(Pid, {Status, Errs}) ->
 			case gen_server:call(Pid, thermals_read) of
-			    {ok, S} -> {max(S, Status), Errs};
+			    {ok, S} -> {max(saturate(S), Status), Errs};
 			    {error, Reason} -> {1.0, [Reason | Errs]}
 			end
 		end, {0.0, []}, Inputs).
@@ -42,11 +51,11 @@ handle_poll(Group) ->
     Status.
 
 init(Params=#{group := Group, interval := Interval}) ->
-    %% if no hi or lo thresholds are provided, we just set them to values that will
-    %% never happen under normal circumstances
+    %% if no hi or lo thresholds are provided, we just set them to
+    %% values that will never happen under normal circumstances
     %%
-    %% XXX modify the controller algorithm depending on whether or not these are
-    %% provided
+    %% XXX modify the controller algorithm depending on whether or not
+    %% these are provided
     Hi = case maps:find(hi, Params) of
 	     {ok, HV} -> HV;
 	     error -> 1.1
@@ -55,8 +64,8 @@ init(Params=#{group := Group, interval := Interval}) ->
 	     {ok, LV} -> LV;
 	     error -> -0.1
 	 end,
-    %% Interval timers are linked to the calling process, so we don't need to save
-    %% the tref here
+    %% Interval timers are linked to the calling process, so we don't
+    %% need to save the tref here
     {ok, _TRef} = timer:send_interval(Interval, poll),
     {ok, lo, #data{group=Group, hi=Hi, lo=Lo}}.
 
