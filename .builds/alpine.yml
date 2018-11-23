@@ -3,6 +3,7 @@ packages:
         - make
         - erlang
         - erlang-common-test
+        - erlang-dev
         - erlang-xmerl
 sources:
         - https://git.sr.ht/~bdk/thermals
