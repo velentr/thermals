@@ -39,10 +39,10 @@ init(Params) ->
 	     none ->
 		 thermals:join_inputs()
 	 end,
-    {ok, #state{path=lists:flatten([Path,
-				    "/temp",
-				    integer_to_list(Index),
-				    "_input"]),
+    {ok, #state{path=filename:join(Path,
+				   lists:flatten(["temp",
+						  integer_to_list(Index),
+						  "_input"])),
 		scale=Scale,
 		min=Min,
 		max=Max}}.
