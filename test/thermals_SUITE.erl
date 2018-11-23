@@ -45,7 +45,8 @@ handle_event({fault, _Group, _Reason}, Pid) ->
     Pid ! fault,
     {ok, Pid};
 handle_event({warn, _Group, {hi, Value}}, Pid) ->
-    Pid ! {hi, Value};
+    Pid ! {hi, Value},
+    {ok, Pid};
 handle_event(_Ev, Pid) ->
     {ok, Pid}.
 
