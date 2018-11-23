@@ -15,11 +15,12 @@ start_link(Params) ->
 handle_call(thermals_read, _From, State) ->
     #state{path=Path, scale=Scale, min=Min, max=Max} = State,
     Reply = case file:read_file(Path) of
-		{ok, SValue} ->
+		{ok, SValueNl} ->
+		    SValue = string:chomp(SValueNl),
 		    Value = float(binary_to_integer(SValue)) / Scale,
 		    {ok, if
-			     Max > Value -> 1.0;
 			     Value < Min -> 0.0;
+			     Max < Value -> 1.0;
 			     true -> (Value - Min) / (Max - Min)
 			 end};
 		{error, Reason} ->
