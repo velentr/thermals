@@ -2,6 +2,7 @@ APPNAME := thermals
 
 APPFILE := ebin/$(APPNAME).app
 APPSRC := src/$(APPNAME).app.src
+APPDEPS := erts kernel stdlib
 
 ERLC ?= erlc
 ERL ?= erl
@@ -14,6 +15,9 @@ CTFLAGS += -logdir logs
 CTFLAGS += -pa ebin
 # ignore stdin (needed for build server)
 CTFLAGS += -noshell
+
+DIALYZER ?= dialyzer
+PLT ?= .plt
 
 SUITE ?= $(APPNAME)_SUITE
 
@@ -30,6 +34,9 @@ clean:
 ct: $(EBIN) $(APPFILE) | logs
 	$(CT) -suite $(SUITE) $(CTFLAGS)
 
+dialyze: | $(PLT)
+	$(DIALYZER) $(ESRC) --plt $(PLT)
+
 sh: $(EBIN)
 	$(ERL) -pa ebin
 
@@ -38,6 +45,9 @@ logs:
 
 ebin:
 	mkdir -p ebin
+
+$(PLT):
+	$(DIALYZER) --build_plt --output_plt $(PLT) --apps $(APPDEPS)
 
 ebin/%.beam: src/%.erl | ebin
 	$(ERLC) $(EFLAGS) $^
