@@ -19,15 +19,19 @@ SUITE ?= $(APPNAME)_SUITE
 
 include src/src.mk
 
-EBIN := $(addprefix ebin/,$(ESRC:=.beam))
+EBIN := $(addprefix ebin/,$(EMOD:=.beam))
+ESRC := $(addprefix src/,$(EMOD:=.erl))
 
 all: $(EBIN) $(APPFILE)
 
-shell: $(EBIN)
-	$(ERL) -pa ebin
+clean:
+	rm -rf ebin logs test/*.beam
 
 ct: $(EBIN) $(APPFILE) | logs
 	$(CT) -suite $(SUITE) $(CTFLAGS)
+
+sh: $(EBIN)
+	$(ERL) -pa ebin
 
 logs:
 	mkdir -p logs
@@ -41,5 +45,4 @@ ebin/%.beam: src/%.erl | ebin
 ebin/%.app: src/%.app.src | ebin
 	cp -u $^ $@
 
-clean:
-	rm -rf ebin logs test/*.beam
+.PHONY: all clean ct sh
