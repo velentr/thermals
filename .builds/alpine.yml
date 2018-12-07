@@ -13,5 +13,4 @@ tasks:
                 make
         - test: |
                 cd thermals
-                make dialyze
                 make ct
