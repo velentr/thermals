@@ -5,6 +5,9 @@ packages:
         - erlang-common-test
         - erlang-dev
         - erlang-xmerl
+        - erlang-dialyzer
+        - erlang-erts
+        - erlang-hipe
 sources:
         - https://git.sr.ht/~bdk/thermals
 tasks:
@@ -13,4 +16,5 @@ tasks:
                 make
         - test: |
                 cd thermals
+                make dialyze
                 make ct
